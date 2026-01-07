@@ -1,0 +1,6 @@
+@TradingEventsStream_HostAddress = http://localhost:5045
+
+GET {{TradingEventsStream_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
