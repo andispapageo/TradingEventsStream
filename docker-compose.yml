@@ -102,8 +102,6 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
-    networks:
-      - trading-network
     command:
       - bash
       - -c
@@ -141,7 +139,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+    
+  db-init:
+    image: postgres:15-alpine
+    container_name: db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: trading_password
+    volumes:
+      - ./init-db.sql:/init-db.sql
+    networks:
+      - trading-network
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be fully ready...' &&
+        sleep 5 &&
+        echo 'Running database initialization...' &&
+        psql -h postgres -U trading_user -d trading_db -f /init-db.sql &&
+        echo 'Database initialization complete!'
+      "
+    restart: "no"
+    
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
