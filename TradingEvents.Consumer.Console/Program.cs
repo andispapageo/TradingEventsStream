@@ -7,7 +7,6 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         services.AddHostedService<TradeEventConsumerService>();
-        services.AddHostedService<OrderExecutionConsumerService>();
     })
     .ConfigureLogging(logging =>
     {

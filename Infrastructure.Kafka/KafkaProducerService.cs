@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using Domain.Core.Interfaces;
 using Domain.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -14,13 +15,17 @@ namespace Infrastructure.Kafka
         private readonly string _executionTopic = "order.executions";
         private readonly string _marketDataTopic = "market.data";
 
-        public KafkaProducerService(ILogger<KafkaProducerService> logger)
+        public KafkaProducerService(IConfiguration configuration, ILogger<KafkaProducerService> logger)
         {
             _logger = logger;
 
+            var bootstrapServers = configuration["Kafka:BootstrapServers"] ??
+                         Environment.GetEnvironmentVariable("Kafka__BootstrapServers") ??
+                         "localhost:9092";
+
             var config = new ProducerConfig
             {
-                BootstrapServers = "localhost:9092",
+                BootstrapServers = bootstrapServers,
                 Acks = Acks.All, // Wait for all in-sync replicas
                 EnableIdempotence = true, // Exactly-once semantics
                 MaxInFlight = 5,
